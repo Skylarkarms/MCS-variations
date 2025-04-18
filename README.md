@@ -1,7 +1,7 @@
 # MCS-variations
 MCS Queued Lock variations.
 
-#Preface
+# Preface
 
 If the process by which a task is queued, becomes so burdensome, that it is better off retrying to skip the queueing completely... during each step of the queuing process... then skipping it does not make it less burdensome.<br>
 The time spent on the attempt was already lost, this is processing power lost... heat produced.
@@ -76,7 +76,7 @@ Any additional failure will only be due to CAS failure.... e.g, <b>contention de
 # Test
 
 In this test many other MCS and synchronization strategies have been tested.<br>
-The main focus of this test, our main hypothesis is called `UnfariMCS` detailed in the charts as "unfair_mcs".<br>
+The main focus of this test, our main hypothesis is called `UnfairMCS` detailed in the charts as "unfair_mcs".<br>
 
 This implementation of MCS, allows the HEAD to be “semi-awake”, busy-waiting on the release of the lock.
 And once the lock is finally acquired, immediately waking up the next node, so that it has a chance to context-switch before the synchronized body sequence even finishes processing before releasing the lock.
@@ -103,7 +103,7 @@ Threads  |        MEDIAN      |      “Normalized”
 The error will (hopefully) not influence the fair measurement of competence as each strategy will be subjected to the same function.
 The purpose is to have a way to visibly acknowledge any differences.
 
-#Results
+# Results
 
 More results at `mcs_variations_benchmarks.xlsx`
 
@@ -115,7 +115,7 @@ More results at `mcs_variations_benchmarks.xlsx`
     - System type	64-bit operating system, x64-based processor
 
 - Legend
-    - `sync` = Java's `synchronize` keyword.
+    - `sync` = Java's `synchronize` keyword (present in the last chart).
     - `std` = Java's `ReentrantReadWriteLock`.
     - `unfair_mcs` = UnfairMCS main proposal of this study.
 
