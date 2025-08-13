@@ -11,14 +11,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class SyncTest {
 
-//    private static final String TYPE = "sync";
-//    private static final String TYPE = "std";
-//    private static final String TYPE = "fair_sync";
-//    private static final String TYPE = "fast_sync";
-//    private static final String TYPE = "unfair_busy_mcs";
-//    private static final String TYPE = "unfair_mcs";
-//    private static final String TYPE = "fair_mcs";
-    private static final String TYPE = "fair_busy_mcs";
+    private static final String TYPE = "weak_A";
+//    private static final String TYPE = "weak_B";
 
     private static final String TAG = "MonitorTest_";
 
@@ -44,7 +38,7 @@ public class SyncTest {
     }
 
     static final double factor = 1.5;
-    static final int maxTries = 22;
+    static final int maxTries = 23;
 //    static final int maxTries = 13;
 //    static final int maxTries = 11;
 //    static final int maxTries = 20;
@@ -53,7 +47,8 @@ public class SyncTest {
 //    static final int maxTries = 10;
 //    static final int maxTries = 25;
 //    static final int size = 50;
-    static final int size = 10;
+    static final int size = 23;
+//    static final int size = 10;
 //    static final int size = 500;
 //    static final int size = 150_000;
 //    static final int size = 700_000;
@@ -64,27 +59,23 @@ public class SyncTest {
         volatile int res = 0;
         private volatile BigInteger lastValue = BigInteger.valueOf(4);
 
-//        final AggroMonitor monitor = new AggroMonitor();
-//        final BaseMonitor monitor = new BaseMonitor();
-//        final UnfairBusyMCS monitor = new UnfairBusyMCS();
-//        final FairMCS monitor = new FairMCS();
-        final FairBusyMCS monitor = new FairBusyMCS();
-//        final UnfairMCS monitor = new UnfairMCS();
-//        final FairMCS monitor = new FairMCS();
-//        final FastSynchronizer monitor = new FastSynchronizer();
-//        final FairSynchronizer monitor = new FairSynchronizer();
-//        final AggroMonitor_2 monitor = new AggroMonitor_2();
-//        final ReentrantReadWriteLock rlLock = new ReentrantReadWriteLock();
-//        final ReentrantReadWriteLock.WriteLock wl = rlLock.writeLock();
-        void add(int i) {
+        final WeakUnfairMCS monitor = new WeakUnfairMCS();//12
+//        final WeakUnfairMCS_MHC7 monitor = new WeakUnfairMCS_MHC7();//15
+//        final WeakUnfairMCS_AKHV monitor = new WeakUnfairMCS_AKHV();//18
+
 //        synchronized void add(int i) {
-//            wl.lock();
+        void add(int i) {
+//            monitor.lock();
             monitor.acquire();
             res = res + i;
             lastValue = lastValue.multiply(BigInteger.valueOf(i));
+//            monitor.unlock();
             monitor.release();
-//            wl.unlock();
         }
+
+//        int branch() {
+//            return monitor.a_min_b();
+//        }
 
         void sanity(int[] ints) {
             BigInteger lastValue = BigInteger.valueOf(4);
@@ -139,12 +130,17 @@ public class SyncTest {
                         adder.add(nums[finalJ]);
 
                         // because of possible unfairness, we cannot rely on the BEFORE value from `start_count` and need a separate counter for the HAPPENS AFTER.
+//                        if (start_count.decrementAndGet() == 0) {
                         if (end_count.incrementAndGet() == size) {
                             long p_l = System.nanoTime() - start[0];
                             long last = p_l/100;
                             try {
                                 times[instance_count][tries] = last;
-                                Print.blue.ln("finish = " + Print.Nanos.toString(times[instance_count][tries]));
+                                Print.blue.ln(
+                                        "finish = " + Print.Nanos.toString(times[instance_count][tries])
+//                                        + "\n branch count = " + adder.branch()
+                                );
+//                                adder.monitor.readBranch();
                                 Thread.sleep(TimeUnit.MILLISECONDS.toMillis(150));
                                 adder.sanity(nums);
                                 int next_size = (int) (size * factor);
